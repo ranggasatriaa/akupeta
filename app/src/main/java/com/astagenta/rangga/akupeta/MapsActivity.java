@@ -24,6 +24,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -129,18 +130,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //pemanggilan tampilan pada google maps
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
         //menambahkan tombol untuk menuju lokasi sekarang
 
         //permisalan untuk android marsmellow
         if (android.os.Build.VERSION .SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 mMap.setMyLocationEnabled(true);
+//                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+//                mMap.setMyLocationEnabled(true);
             }
         }
         else {
             //android dibawah masrsmelow
             mMap.setMyLocationEnabled(true);
         }
+
+//        LatLng latLng = new LatLng(-7.0527812, 110.3876632);
+//        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
+//        mMap.animateCamera(cameraUpdate);
 
         Button buttonLocation = (Button) findViewById(R.id.btnLocation);
         //listener ketika button di klik
@@ -152,7 +160,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //method untuk mengambil alamat lokasi
                 getAddress(center.latitude,center.longitude);
                 //JSON PARSE
-                jsonParse();
+                jsonParse("http://nearyou.ranggasatria.com/index.php/json/read");
             }
         });
     }
@@ -179,9 +187,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void jsonParse() {
-        String url = "http://nearyou.ranggasatria.com/index.php/json/read";
-
+    private void jsonParse(String url) {
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
