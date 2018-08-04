@@ -9,10 +9,12 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -24,6 +26,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,6 +37,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 
@@ -46,11 +52,19 @@ import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    private static final String TAG = "MapsActivity";
+    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+    private static final int DEFAULT_ZOOM = 15;
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+
+    private Boolean mLocationPermissionGranted = false;
     private GoogleMap mMap;
     private RequestQueue mRequestQueue;
     private TextView mText;
+    private FusedLocationProviderClient mFusedLocationProviderClient;
 
-//    private ArrayList<MarkerData> markersArray = new ArrayList<MarkerData>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,21 +73,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mText = findViewById(R.id.text_view_result);
         mRequestQueue = Volley.newRequestQueue(this);
 
+        getLocationPermission();
+
         //meminta permission user untuk mengakses lokasi
         //untuk versi marshmallow keatas butuh penanganan permission yang berbeda dari versi sebelumnya
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
         }
-
-
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
-
-    //kode untuk permision mengakses lokasi
-    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
     public void checkLocationPermission(){
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -106,93 +116,120 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             case MY_PERMISSIONS_REQUEST_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
                     // permission was granted. Do the
                     // contacts-related task you need to do.
                     if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
                         mMap.setMyLocationEnabled(true);
                     }
                 } else {
-
                     // Permission denied, Disable the functionality that depends on this permission.
                     Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
                 }
                 break;
             }
-
             // other 'case' lines to check for other permissions this app might request.
             // You can add here other case statements according to your requirement.
         }
     }
 
     @Override
-    //pemanggilan tampilan pada google maps
+    /*pemanggilan tampilan pada google maps*/
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        //menambahkan tombol untuk menuju lokasi sekarang
-
-        //permisalan untuk android marsmellow
+        getDeviceLocation();
+        /*permisalan untuk android marsmellow*/
         if (android.os.Build.VERSION .SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 mMap.setMyLocationEnabled(true);
-//                mMap.getUiSettings().setMyLocationButtonEnabled(true);
-//                mMap.setMyLocationEnabled(true);
+                mMap.getUiSettings().setMyLocationButtonEnabled(true);
             }
         }
         else {
-            //android dibawah masrsmelow
+            /*android dibawah masrsmelow*/
             mMap.setMyLocationEnabled(true);
         }
 
-//        LatLng latLng = new LatLng(-7.0527812, 110.3876632);
-//        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
-//        mMap.animateCamera(cameraUpdate);
+        /*JSON PARSE*/
+        jsonParse("http://nearyou.ranggasatria.com/index.php/json/read");
 
-        Button buttonLocation = (Button) findViewById(R.id.btnLocation);
-        //listener ketika button di klik
-        buttonLocation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //ambil latitude dan longitude lokasi
-                LatLng center = mMap.getCameraPosition().target;
-                //method untuk mengambil alamat lokasi
-                getAddress(center.latitude,center.longitude);
-                //JSON PARSE
-                jsonParse("http://nearyou.ranggasatria.com/index.php/json/read");
-            }
-        });
     }
 
-    public void getAddress(double lat, double lng) {
-        //mengonversi koordinat geografis yang akan ditempatkan pada peta jadi alamat.
-        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
-            //bentuk objek dari alamat
-            Address obj = addresses.get(0);
-            String add = obj.getAddressLine(0);
-            add = add + "\n" + obj.getCountryName();
-            add = add + "\n" + obj.getCountryCode();
-            add = add + "\n" + obj.getAdminArea();
-            add = add + "\n" + obj.getPostalCode();
-            add = add + "\n" + obj.getSubAdminArea();
-            add = add + "\n" + obj.getLocality();
-            add = add + "\n" + obj.getSubThoroughfare();
+    /*MENGAMBIL PERMISSION UNTUK ANDROID MASRSMELLOW KEATAS*/
+    private void getLocationPermission(){
+        Log.d(TAG, "getLocationPermission: here");
+        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
 
-            Toast.makeText(this, add, Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(ContextCompat.checkSelfPermission(this.getApplicationContext(), FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            if (ContextCompat.checkSelfPermission(this.getApplicationContext(), COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+                mLocationPermissionGranted = true;
+                initMap();
+            }else{
+                ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
+            }
+        }else{
+            ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
         }
     }
 
+    private void initMap(){
+        Log.d(TAG, "initMap: initializing map");
+        Toast.makeText(this, "MAPS IS REAFY", Toast.LENGTH_SHORT).show();
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(MapsActivity.this);
+    }
+
+    private void getDeviceLocation(){
+        Log.d(TAG, "getDeviceLocation: Getting device current location");
+
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
+        try{
+            if (mLocationPermissionGranted){
+                Task location = mFusedLocationProviderClient.getLastLocation();
+                location.addOnCompleteListener(new OnCompleteListener() {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
+                        if (task.isSuccessful()){
+                            Log.d(TAG, "onComplete:  found location");
+                            Location curretLocation = (Location) task.getResult();
+                            Log.d(TAG, "onComplete: Lat: "+curretLocation.getLatitude()+"Long: "+curretLocation.getLongitude());
+                            moveCamera(new LatLng(curretLocation.getLatitude(), curretLocation.getLongitude()), DEFAULT_ZOOM);
+                        }else{
+                            Log.d(TAG, "onComplete: current location is null");
+                            Toast.makeText(MapsActivity.this, "unnable to get curent location", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                });
+            }else{
+                Log.d(TAG, "getDeviceLocation: mLocationPermisionGranted: false");
+            }
+
+        }catch (SecurityException e){
+            Log.d(TAG, "getDeviceLocation: " + e.getMessage());
+        }
+    }
+
+    private void moveCamera(LatLng latLng, float zoom){
+        Log.d(TAG, "MoveCamera: moving camera to lat: "+ latLng.latitude +" long "+ latLng.longitude);
+        Toast.makeText(this, "lat: "+latLng.latitude+" long: "+latLng.longitude+"zoom: "+zoom,Toast.LENGTH_SHORT).show();
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+//        CameraPosition cameraPosition = new CameraPosition.Builder()
+//                .target(latLng)      // Sets the center of the map to Mountain View
+//                .zoom(zoom)         // Sets the zoom
+//                .build();
+//        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+    }
+
+
     private void jsonParse(String url) {
+//        String url = "http://nearyou.ranggasatria.com/index.php/json/read";
+
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        mText.setText("");
                         mMap.clear();
                         try {
                             JSONArray jsonArray = response.getJSONArray("tempat");
@@ -203,9 +240,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 Double longitude = tempat.getDouble("tempat_longitude");
                                 String imageUrl = tempat.getString("kategori_icon");
 
-                                mText.append(firstName + ", "+ latitude + ", " + longitude + ", " + imageUrl + "\n\n");
                                 createMarker(latitude, longitude,firstName, imageUrl);
-
 //                                Picasso.with(MapsActivity.this).load("http://nearyou.ranggasatria.com/assets/"+imageUrl).fit().centerInside().into(mImage);
                             }
                         } catch (JSONException e) {
@@ -225,14 +260,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     protected Marker createMarker(double latitude, double longitude, String title, String snippet) {
 
-//        RequestCreator image = Picasso.with(MapsActivity.this).load("http://nearyou.ranggasatria.com/assets/img/map-marker.png");
-
         return mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(latitude, longitude))
                 .anchor(0.5f, 0.5f)
                 .title(title)
                 .snippet(snippet)
-//                .icon(BitmapDescriptorFactory.fromBitmap(image))
         );
     }
 }
