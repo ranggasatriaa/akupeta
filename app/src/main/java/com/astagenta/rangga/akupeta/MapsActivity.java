@@ -26,9 +26,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -136,12 +136,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /*pemanggilan tampilan pada google maps*/
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        getDeviceLocation();
-        /*permisalan untuk android marsmellow*/
+
+        //menambahkan tombol untuk menuju lokasi sekarang
+
+        //permisalan untuk android marsmellow
         if (android.os.Build.VERSION .SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 mMap.setMyLocationEnabled(true);
-                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+//                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+//                mMap.setMyLocationEnabled(true);
             }
         }
         else {
@@ -149,22 +152,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.setMyLocationEnabled(true);
         }
 
-        /*JSON PARSE*/
-        jsonParse("http://nearyou.ranggasatria.com/index.php/json/read");
+//        LatLng latLng = new LatLng(-7.0527812, 110.3876632);
+//        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
+//        mMap.animateCamera(cameraUpdate);
 
-    }
-
-    /*MENGAMBIL PERMISSION UNTUK ANDROID MASRSMELLOW KEATAS*/
-    private void getLocationPermission(){
-        Log.d(TAG, "getLocationPermission: here");
-        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
-
-        if(ContextCompat.checkSelfPermission(this.getApplicationContext(), FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-            if (ContextCompat.checkSelfPermission(this.getApplicationContext(), COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-                mLocationPermissionGranted = true;
-                initMap();
-            }else{
-                ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
+        Button buttonLocation = (Button) findViewById(R.id.btnLocation);
+        //listener ketika button di klik
+        buttonLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //ambil latitude dan longitude lokasi
+                LatLng center = mMap.getCameraPosition().target;
+                //method untuk mengambil alamat lokasi
+                getAddress(center.latitude,center.longitude);
+                //JSON PARSE
+                jsonParse("http://nearyou.ranggasatria.com/index.php/json/read");
             }
         }else{
             ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
@@ -211,21 +213,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void moveCamera(LatLng latLng, float zoom){
-        Log.d(TAG, "MoveCamera: moving camera to lat: "+ latLng.latitude +" long "+ latLng.longitude);
-        Toast.makeText(this, "lat: "+latLng.latitude+" long: "+latLng.longitude+"zoom: "+zoom,Toast.LENGTH_SHORT).show();
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
-//        CameraPosition cameraPosition = new CameraPosition.Builder()
-//                .target(latLng)      // Sets the center of the map to Mountain View
-//                .zoom(zoom)         // Sets the zoom
-//                .build();
-//        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-    }
-
-
     private void jsonParse(String url) {
-//        String url = "http://nearyou.ranggasatria.com/index.php/json/read";
-
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
