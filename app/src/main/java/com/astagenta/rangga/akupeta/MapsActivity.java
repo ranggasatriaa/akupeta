@@ -64,7 +64,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
   //kode untuk permision mengakses lokasi
   private FusedLocationProviderClient mFusedLocationProviderClient;
-  private Boolean mLocationPermissionGranted = false;
+//  private Boolean mLocationPermissionGranted = false;
   private GoogleMap mMap;
   private RequestQueue mRequestQueue;
   private TextView mText;
@@ -179,20 +179,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
       mMap.setMyLocationEnabled(true);
     }
     /*JSON PARSE*/
-    jsonParse("http://nearyou.ranggasatria.com/index.php/json/read");
-
-//    Button buttonLocation = (Button) findViewById(R.id.btnLocation);
-//    //listener ketika button di klik
-//    buttonLocation.setOnClickListener(new View.OnClickListener() {
-//      @Override
-//      public void onClick(View v) {
-//        //ambil latitude dan longitude lokasi
-//        LatLng center = mMap.getCameraPosition().target;
-//        //method untuk mengambil alamat lokasi
-//        getAddress(center.latitude, center.longitude);
-//        //JSON PARSE
-//      }
-//    });
+    jsonParse("http://192.168.100.21/nearyou/index.php/api/read");
+//    jsonParse("http://nearyou.ranggasatria.com/index.php/api/read");
   }
 
   public void getAddress(double lat, double lng) {
@@ -226,7 +214,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //                        mText.setText("");
             mMap.clear();
             try {
-              JSONArray jsonArray = response.getJSONArray("Tempat");
+              JSONArray jsonArray = response.getJSONArray("tempat");
               for (int i = 0; i < jsonArray.length(); i++) {
                 Log.d(TAG, "onResponse: masuk perulangan");
                 JSONObject tempat = jsonArray.getJSONObject(i);
@@ -235,7 +223,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Double latitude = tempat.getDouble("tempat_latitude");
                 Double longitude = tempat.getDouble("tempat_longitude");
                 String imageUrl = tempat.getString("kategori_icon");
-//              mText.append(firstName + ", "+ latitude + ", " + longitude + ", " + imageUrl + "\n\n");
                 createMarker(latitude, longitude, tempatId, firstName, imageUrl);
 //                createMarker(latitude, longitude, firstName, imageUrl);
 //              Picasso.with(MapsActivity.this).load("http://nearyou.ranggasatria.com/assets/"+imageUrl).fit().centerInside().into(mImage);
@@ -258,15 +245,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     mRequestQueue.add(request);
   }
 
-  protected Marker createMarker(double latitude, double longitude, String id, String title, String snippet) {
+  protected Marker createMarker(double latitude, double longitude, final String id, String title, String snippet) {
 //  protected Marker createMarker(double latitude, double longitude, String title, String snippet) {
 //        RequestCreator image = Picasso.with(MapsActivity.this).load("http://nearyou.ranggasatria.com/assets/img/map-marker.png");
     mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
       @Override
       public void onInfoWindowClick(Marker marker) {
         Intent intent = new Intent(MapsActivity.this, DetailActivity.class);
-        intent.putExtra("TEMPAT_ID", "1");
-        context.startActivity(intent);
+        intent.putExtra("TEMPAT_ID", id);
+        startActivity(intent);
 
       }
     });

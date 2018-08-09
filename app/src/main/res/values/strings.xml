@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">akupeta</string>
     <string name="title_activity_maps">Near You</string>
+    <string name="title_activity_detail">Near You</string>
+
+    <string name="card_margin">10dp</string>
 </resources>
