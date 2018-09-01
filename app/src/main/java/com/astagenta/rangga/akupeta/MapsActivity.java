@@ -5,10 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.AudioManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -18,6 +20,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +38,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -64,11 +69,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
   //kode untuk permision mengakses lokasi
   private FusedLocationProviderClient mFusedLocationProviderClient;
-//  private Boolean mLocationPermissionGranted = false;
+
+  private Circle circle;
+  private SeekBar mSeekbar;
   private GoogleMap mMap;
   private RequestQueue mRequestQueue;
-  private TextView mText;
-
   private Context context;
 
 
@@ -76,8 +81,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_maps);
-    mText = findViewById(R.id.text_view_result);
     mRequestQueue = Volley.newRequestQueue(this);
+    mSeekbar = findViewById(R.id.seekbar);
 
     /*meminta permission user untuk mengakses lokasi untuk versi marshmallow keatas butuh penanganan permission yang berbeda dari versi sebelumnya*/
     if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -86,6 +91,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     getDeviceLocation();
 
+    mSeekbar.setMax(9000);
+    mSeekbar.setProgress(0);
+
+    mSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+      @Override
+      public void onStopTrackingTouch(SeekBar arg0) {
+      }
+
+      @Override
+      public void onStartTrackingTouch(SeekBar arg0) {
+      }
+
+      @Override
+      public void onProgressChanged(SeekBar arg0, int progress, boolean arg2) {
+//        if (progress >= 1000) {
+          circle.setRadius(progress+1000);
+//        }
+
+      }
+    });
+    
     /*Obtain the SupportMapFragment and get notified when the map is ready to be used.*/
     SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
     mapFragment.getMapAsync(this);
@@ -126,7 +152,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
           Log.d(TAG, "onComplete:  found location");
           Location curretLocation = (Location) task.getResult();
           Log.d(TAG, "onComplete: Lat: " + curretLocation.getLatitude() + "Long: " + curretLocation.getLongitude());
+          /*CENTER MAPS TO MY LOCATION*/
           moveCamera(new LatLng(curretLocation.getLatitude(), curretLocation.getLongitude()), DEFAULT_ZOOM);
+          /*CREATE CIRCLE*/
+          circle = mMap.addCircle(new CircleOptions()
+              .center(new LatLng(curretLocation.getLatitude(), curretLocation.getLongitude()))
+              .fillColor(0x300000ff)
+              .strokeWidth(2)
+              .strokeColor(Color.BLUE)
+              .radius(1000));
+//          drawCircle(new LatLng(curretLocation.getLatitude(), curretLocation.getLongitude()), 1000);
+
         } else {
           Log.d(TAG, "onComplete: current location is null");
           Toast.makeText(MapsActivity.this, "unnable to get curent location", Toast.LENGTH_SHORT).show();
@@ -138,8 +174,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   /*MERUBAH CENTER PETA*/
   private void moveCamera(LatLng latLng, float zoom) {
     Log.d(TAG, "MoveCamera: moving camera to lat: " + latLng.latitude + " long " + latLng.longitude);
-//        Toast.makeText(this, "lat: "+latLng.latitude+" long: "+latLng.longitude+"zoom: "+zoom,Toast.LENGTH_SHORT).show();
+    //Toast.makeText(this, "lat: "+latLng.latitude+" long: "+latLng.longitude+"zoom: "+zoom,Toast.LENGTH_SHORT).show();
     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+  }
+
+  private void drawCircle(LatLng point, int radius) {
+    Log.d(TAG, "drawCircle: masuk circle");
+    // Instantiating CircleOptions to draw a circle around the marker
+    CircleOptions circleOptions = new CircleOptions();
+    // Specifying the center of the circle
+    circleOptions.center(point);
+    // Radius of the circle
+    circleOptions.radius(radius);
+    // Border color of the circle
+    circleOptions.strokeColor(Color.BLACK);
+    // Fill color of the circle
+    circleOptions.fillColor(0x30ff0000);
+    // Border width of the circle
+    circleOptions.strokeWidth(2);
+    // Adding the circle to the GoogleMap
+    mMap.addCircle(circleOptions);
   }
 
   /*menyimpan permission yang diizinkan oleh user*/
@@ -175,12 +229,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setMyLocationEnabled(true);
       }
     } else {
-      //android dibawah masrsmelow
+      /*android dibawah masrsmelow*/
       mMap.setMyLocationEnabled(true);
     }
     /*JSON PARSE*/
-    jsonParse("http://192.168.100.21/nearyou/index.php/api/read");
-//    jsonParse("http://nearyou.ranggasatria.com/index.php/api/read");
+//    jsonParse("http://192.168.100.21/nearyou/index.php/api/read");
+    jsonParse("http://nearyou.ranggasatria.com/index.php/api/read");
   }
 
   public void getAddress(double lat, double lng) {
@@ -211,8 +265,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
           @Override
           public void onResponse(JSONObject response) {
             Log.d(TAG, "onResponse: Masuk JSON");
-//                        mText.setText("");
-            mMap.clear();
             try {
               JSONArray jsonArray = response.getJSONArray("tempat");
               for (int i = 0; i < jsonArray.length(); i++) {
@@ -238,7 +290,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         , new Response.ErrorListener() {
       @Override
       public void onErrorResponse(VolleyError error) {
-        error.printStackTrace();
+//        error.printStackTrace();
+        Log.d(TAG, "onErrorResponse: " + error.getMessage());
       }
     });
 
