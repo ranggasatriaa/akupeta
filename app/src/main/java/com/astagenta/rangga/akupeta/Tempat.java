@@ -13,6 +13,9 @@ public class Tempat {
   private String kategoriName;
   private String kategoriIcon;
 
+  public Tempat(){
+
+  }
   public Tempat(int id, String nama, String deskripsi, String telphone, Double latitude, Double longitude, Integer kategoriId, Integer status, String kategoriName, String kategoriIcon) {
     this.id = id;
     this.nama = nama;
@@ -24,6 +27,19 @@ public class Tempat {
     this.status = status;
     this.kategoriName = kategoriName;
     this.kategoriIcon = kategoriIcon;
+  }
+
+  public Tempat(int id, String nama, Double latitude, Double longitude, String kategoriName, String kategoriIcon) {
+    this.id = id;
+    this.nama = nama;
+    this.latitude = latitude;
+    this.longitude = longitude;
+    this.kategoriName = kategoriName;
+    this.kategoriIcon = kategoriIcon;
+  }
+
+  public String toString(){
+    return "Id: " + id + "\nNama : " + nama + "\nLatitude : " + latitude + "\nLongitude : " + longitude+ "\nKategori : " + kategoriName+ "\nIcon : " + kategoriIcon;
   }
 
   public int getId() {

@@ -55,6 +55,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -64,17 +65,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
   private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
   private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
-  private static final int DEFAULT_ZOOM = 15;
+  private static final int DEFAULT_ZOOM = 14;
   public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
   //kode untuk permision mengakses lokasi
   private FusedLocationProviderClient mFusedLocationProviderClient;
-
   private Circle circle;
   private SeekBar mSeekbar;
   private GoogleMap mMap;
   private RequestQueue mRequestQueue;
   private Context context;
+  private ArrayList<Tempat> listTempat = new ArrayList<>();
+  int temp = 0;
+  int zoom;
 
 
   @Override
@@ -88,12 +91,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       checkLocationPermission();
     }
-
     getDeviceLocation();
-
     mSeekbar.setMax(9000);
     mSeekbar.setProgress(0);
-
     mSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
       @Override
       public void onStopTrackingTouch(SeekBar arg0) {
@@ -105,18 +105,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
       @Override
       public void onProgressChanged(SeekBar arg0, int progress, boolean arg2) {
-//        if (progress >= 1000) {
-          circle.setRadius(progress+1000);
+        circle.setRadius(progress + 1000);
+//        if (temp <= (progress/1000)){
+//          temp = (progress/1000);
+//          zoom = 1;
+//        }else{
+//          temp = (progress/1000);
+//          zoom = 0;
+//        }
+//        if (zoom == 1){
+//          mMap.moveCamera(CameraUpdateFactory.zoomOut());
+//        }else{
+//          mMap.moveCamera(CameraUpdateFactory.zoomIn());
 //        }
 
       }
     });
-    
+
     /*Obtain the SupportMapFragment and get notified when the map is ready to be used.*/
     SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
     mapFragment.getMapAsync(this);
   }
-
 
   public void checkLocationPermission() {
     if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -138,7 +147,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
   private void getDeviceLocation() {
     Log.d(TAG, "getDeviceLocation: Getting device current location");
-
     mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
     if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -161,8 +169,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
               .strokeWidth(2)
               .strokeColor(Color.BLUE)
               .radius(1000));
-//          drawCircle(new LatLng(curretLocation.getLatitude(), curretLocation.getLongitude()), 1000);
-
         } else {
           Log.d(TAG, "onComplete: current location is null");
           Toast.makeText(MapsActivity.this, "unnable to get curent location", Toast.LENGTH_SHORT).show();
@@ -232,33 +238,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
       /*android dibawah masrsmelow*/
       mMap.setMyLocationEnabled(true);
     }
-    /*JSON PARSE*/
-//    jsonParse("http://192.168.100.21/nearyou/index.php/api/read");
     jsonParse("http://nearyou.ranggasatria.com/index.php/api/read");
   }
 
-  public void getAddress(double lat, double lng) {
-    //mengonversi koordinat geografis yang akan ditempatkan pada peta jadi alamat.
-    Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-    try {
-      List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
-      //bentuk objek dari alamat
-      Address obj = addresses.get(0);
-      String add = obj.getAddressLine(0);
-      add = add + "\n" + obj.getCountryName();
-      add = add + "\n" + obj.getCountryCode();
-      add = add + "\n" + obj.getAdminArea();
-      add = add + "\n" + obj.getPostalCode();
-      add = add + "\n" + obj.getSubAdminArea();
-      add = add + "\n" + obj.getLocality();
-      add = add + "\n" + obj.getSubThoroughfare();
-
-      Toast.makeText(this, add, Toast.LENGTH_SHORT).show();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
+  /*JSON PARSE*/
   private void jsonParse(String url) {
     JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
         new Response.Listener<JSONObject>() {
@@ -270,14 +253,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
               for (int i = 0; i < jsonArray.length(); i++) {
                 Log.d(TAG, "onResponse: masuk perulangan");
                 JSONObject tempat = jsonArray.getJSONObject(i);
-                String tempatId = tempat.getString("id");
-                String firstName = tempat.getString("tempat_nama");
+                int tempatId = tempat.getInt("id");
+                String tempatName = tempat.getString("tempat_nama");
                 Double latitude = tempat.getDouble("tempat_latitude");
                 Double longitude = tempat.getDouble("tempat_longitude");
-                String imageUrl = tempat.getString("kategori_icon");
-                createMarker(latitude, longitude, tempatId, firstName, imageUrl);
-//                createMarker(latitude, longitude, firstName, imageUrl);
-//              Picasso.with(MapsActivity.this).load("http://nearyou.ranggasatria.com/assets/"+imageUrl).fit().centerInside().into(mImage);
+                String kategoriName = tempat.getString("kategori_name");
+                String kategoriIcon = tempat.getString("kategori_icon");
+
+                createMarker(latitude, longitude, Integer.toString(tempatId), tempatName, kategoriIcon);
+//                Tempat mTempat = new Tempat(tempatId, tempatName, latitude, longitude, kategoriName, kategoriIcon);
+//                listTempat.set(i,mTempat);
+//                Log.d(TAG, "List tempat: "+ mTempat.toString());
+//                Log.d(TAG, "List array: "+ listTempat.toString());
               }
             } catch (JSONException e) {
               StringWriter stack = new StringWriter();
@@ -299,25 +286,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   }
 
   protected Marker createMarker(double latitude, double longitude, final String id, String title, String snippet) {
-//  protected Marker createMarker(double latitude, double longitude, String title, String snippet) {
-//        RequestCreator image = Picasso.with(MapsActivity.this).load("http://nearyou.ranggasatria.com/assets/img/map-marker.png");
     mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
       @Override
       public void onInfoWindowClick(Marker marker) {
         Intent intent = new Intent(MapsActivity.this, DetailActivity.class);
         intent.putExtra("TEMPAT_ID", id);
         startActivity(intent);
-
       }
     });
+    /*merubah text jadi Integer*/
+//      Integer i = Integer.parseInt("map_marker_blue");
+//    Integer icons =  R.drawable.i;
+    Integer icons = R.drawable.map_marker_blue;
+
     return mMap.addMarker(new MarkerOptions()
             .position(new LatLng(latitude, longitude))
             .anchor(0.5f, 0.5f)
             .title(title)
-            .snippet(snippet + " -> ")
-//          .icon(BitmapDescriptorFactory.fromBitmap(image))
+            .snippet(snippet + " -> "+ id)
+            .icon(BitmapDescriptorFactory.fromResource(icons))
     );
-
   }
-
 }

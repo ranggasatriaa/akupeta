@@ -66,6 +66,7 @@ public class DetailActivity extends AppCompatActivity {
           @Override
           public void onResponse(JSONObject response) {
             Log.d(TAG, "onResponse: Masuk JSON");
+//            Log.d(TAG, "onResponse: url di json" + url);
             try {
               Log.d(TAG, "onResponse: " + response.toString());
 
