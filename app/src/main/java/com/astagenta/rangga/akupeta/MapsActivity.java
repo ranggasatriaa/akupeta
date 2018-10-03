@@ -250,6 +250,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.d(TAG, "onResponse: Masuk JSON");
             try {
               JSONArray jsonArray = response.getJSONArray("tempat");
+//              JSONArray info = new JSONArray(response);
+
               for (int i = 0; i < jsonArray.length(); i++) {
                 Log.d(TAG, "onResponse: masuk perulangan");
                 JSONObject tempat = jsonArray.getJSONObject(i);
