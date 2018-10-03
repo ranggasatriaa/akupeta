@@ -29,6 +29,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -238,19 +239,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
       /*android dibawah masrsmelow*/
       mMap.setMyLocationEnabled(true);
     }
-    jsonParse("http://nearyou.ranggasatria.com/index.php/api/read");
+    jsonParse("http://nearyou.ranggasatria.com/index.php/api/read2");
   }
 
   /*JSON PARSE*/
   private void jsonParse(String url) {
-    JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-        new Response.Listener<JSONObject>() {
+    Log.d(TAG, "parseJSON: masuk parsing");
+    StringRequest request = new StringRequest(Request.Method.GET, url,
+        new Response.Listener<String>() {
+
           @Override
-          public void onResponse(JSONObject response) {
-            Log.d(TAG, "onResponse: Masuk JSON");
+          public void onResponse(String response) {
+            Log.d(TAG, "onResponse: Masuk onResponse");
             try {
-              JSONArray jsonArray = response.getJSONArray("tempat");
-//              JSONArray info = new JSONArray(response);
+//              JSONArray jsonArray = response.getJSONArray("tempat");
+              JSONArray jsonArray = new JSONArray(response);
 
               for (int i = 0; i < jsonArray.length(); i++) {
                 Log.d(TAG, "onResponse: masuk perulangan");
@@ -272,6 +275,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
               StringWriter stack = new StringWriter();
               e.printStackTrace(new PrintWriter(stack));
 //              e.printStackTrace();
+              Log.d(TAG, "onResponse: "+e);
               Log.d(TAG, "onResponse:" + stack.toString());
             }
           }
