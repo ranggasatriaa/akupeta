@@ -71,6 +71,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
   //kode untuk permision mengakses lokasi
   private FusedLocationProviderClient mFusedLocationProviderClient;
+
+  private Button mTambah;
   private Circle circle;
   private SeekBar mSeekbar;
   private GoogleMap mMap;
@@ -126,6 +128,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /*Obtain the SupportMapFragment and get notified when the map is ready to be used.*/
     SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
     mapFragment.getMapAsync(this);
+
+    mTambah = findViewById(R.id.tambah);
+    mTambah.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        startActivity(new Intent(MapsActivity.this, TambahActivity.class));
+      }
+    });
+
   }
 
   public void checkLocationPermission() {
