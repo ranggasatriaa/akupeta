@@ -1,134 +1,134 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:background="#f1f1f1"
-  android:orientation="vertical"
-  tools:context=".DetailActivity">
-
-  <ImageView
-    android:id="@+id/image"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:src="@drawable/ic_launcher_background" />
+    android:layout_height="match_parent"
+    android:background="#f1f1f1"
+    android:orientation="vertical"
+    tools:context=".DetailActivity">
 
-  <TextView
-    android:id="@+id/kategoriTextView"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/colorPrimary"
-    android:padding="10dp"
-    android:text="Kategori"
-    android:textColor="@color/colorWhite"
-    android:textSize="20sp" />
-
-  <android.support.v7.widget.CardView
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="10dp"
-    android:padding="10dp">
-
-
-    <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:orientation="vertical">
-
-      <LinearLayout
+    <ImageView
+        android:id="@+id/image"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_launcher_background" />
 
-        <ImageView
-          android:layout_width="20dp"
-          android:layout_height="20dp"
-          android:layout_margin="10dp"
-          android:src="@drawable/paper" />
+    <TextView
+        android:id="@+id/kategoriTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:padding="10dp"
+        android:text="Kategori"
+        android:textColor="@color/colorWhite"
+        android:textSize="20sp" />
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:padding="10dp">
+
 
         <LinearLayout
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:layout_margin="10dp"
-          android:orientation="vertical">
-
-          <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Deskripsi:"
-            android:textStyle="bold" />
-
-          <TextView
-            android:id="@+id/deskripsiTextView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Deskripsi disini" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="@dimen/margin_30"
+                    android:layout_height="@dimen/length_30"
+                    android:layout_margin="@dimen/margin_10"
+                    android:src="@drawable/ic_menu_orange" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Deskripsi:"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/deskripsiTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Deskripsi disini" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="@dimen/margin_30"
+                    android:layout_height="@dimen/length_30"
+                    android:layout_margin="@dimen/margin_10"
+                    android:src="@drawable/ic_location_on_orange" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Alamat:"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/alamatTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Alamat" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="@dimen/margin_30"
+                    android:layout_height="@dimen/length_30"
+                    android:layout_margin="@dimen/margin_10"
+                    android:src="@drawable/ic_phone_in_orange" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nomor Telepon:"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/teleponTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="telphoneTextView" />
+
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
-      </LinearLayout>
-
-      <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
-
-        <ImageView
-          android:layout_width="20dp"
-          android:layout_height="20dp"
-          android:layout_margin="10dp"
-          android:src="@drawable/marker" />
-
-        <LinearLayout
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:layout_margin="10dp"
-          android:orientation="vertical">
-
-          <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Alamat:"
-            android:textStyle="bold" />
-
-          <TextView
-            android:id="@+id/alamatTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Alamat" />
-        </LinearLayout>
-      </LinearLayout>
-
-      <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
-
-        <ImageView
-          android:layout_width="20dp"
-          android:layout_height="20dp"
-          android:layout_margin="10dp"
-          android:src="@drawable/phone" />
-
-        <LinearLayout
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:layout_margin="10dp"
-          android:orientation="vertical">
-
-          <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Nomor Telepon:"
-            android:textStyle="bold" />
-
-          <TextView
-            android:id="@+id/teleponTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="telphoneTextView" />
-
-        </LinearLayout>
-      </LinearLayout>
-    </LinearLayout>
-  </android.support.v7.widget.CardView>
+    </android.support.v7.widget.CardView>
 </LinearLayout>
