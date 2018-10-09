@@ -81,6 +81,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   private ArrayList<Tempat> listTempat = new ArrayList<>();
   int temp = 0;
   int zoom;
+  String tempatId;
+
 
 
   @Override
@@ -109,19 +111,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
       @Override
       public void onProgressChanged(SeekBar arg0, int progress, boolean arg2) {
         circle.setRadius(progress + 1000);
-//        if (temp <= (progress/1000)){
-//          temp = (progress/1000);
-//          zoom = 1;
-//        }else{
-//          temp = (progress/1000);
-//          zoom = 0;
-//        }
-//        if (zoom == 1){
-//          mMap.moveCamera(CameraUpdateFactory.zoomOut());
-//        }else{
-//          mMap.moveCamera(CameraUpdateFactory.zoomIn());
-//        }
-
       }
     });
 
@@ -136,7 +125,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         startActivity(new Intent(MapsActivity.this, TambahActivity.class));
       }
     });
-
   }
 
   public void checkLocationPermission() {
@@ -153,6 +141,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         /* No explanation needed, we can request the permission.*/
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
         Log.d(TAG, "checkLocationPermission: else");
+      }
+    }
+  }
+
+  /*menyimpan permission yang diizinkan oleh user*/
+  @Override
+  public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    switch (requestCode) {
+      case MY_PERMISSIONS_REQUEST_LOCATION: {
+        /*If request is cancelled, the result arrays are empty.*/
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+          /* permission was granted. Do the*/
+          /* contacts-related task you need to do.*/
+          if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+            getDeviceLocation();
+          }
+        } else {
+          /*Permission denied, Disable the functionality that depends on this permission.*/
+          Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
+        }
+        break;
       }
     }
   }
@@ -196,45 +206,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
   }
 
-  private void drawCircle(LatLng point, int radius) {
-    Log.d(TAG, "drawCircle: masuk circle");
-    // Instantiating CircleOptions to draw a circle around the marker
-    CircleOptions circleOptions = new CircleOptions();
-    // Specifying the center of the circle
-    circleOptions.center(point);
-    // Radius of the circle
-    circleOptions.radius(radius);
-    // Border color of the circle
-    circleOptions.strokeColor(Color.BLACK);
-    // Fill color of the circle
-    circleOptions.fillColor(0x30ff0000);
-    // Border width of the circle
-    circleOptions.strokeWidth(2);
-    // Adding the circle to the GoogleMap
-    mMap.addCircle(circleOptions);
-  }
-
-  /*menyimpan permission yang diizinkan oleh user*/
-  @Override
-  public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-    switch (requestCode) {
-      case MY_PERMISSIONS_REQUEST_LOCATION: {
-        /*If request is cancelled, the result arrays are empty.*/
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-          /* permission was granted. Do the*/
-          /* contacts-related task you need to do.*/
-          if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
-            getDeviceLocation();
-          }
-        } else {
-          /*Permission denied, Disable the functionality that depends on this permission.*/
-          Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
-        }
-        break;
-      }
-    }
-  }
 
   @Override
   /*pemanggilan tampilan pada google maps*/
@@ -250,7 +221,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
       /*android dibawah masrsmelow*/
       mMap.setMyLocationEnabled(true);
     }
-    jsonParse("http://nearyou.ranggasatria.com/index.php/api/read2");
+    jsonParse("http://nearyou.ranggasatria.com/api/read" );
   }
 
   /*JSON PARSE*/
@@ -267,16 +238,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
               JSONArray jsonArray = new JSONArray(response);
 
               for (int i = 0; i < jsonArray.length(); i++) {
-                Log.d(TAG, "onResponse: masuk perulangan");
                 JSONObject tempat = jsonArray.getJSONObject(i);
-                int tempatId = tempat.getInt("id");
+                tempatId = tempat.getString("id");
                 String tempatName = tempat.getString("tempat_nama");
                 Double latitude = tempat.getDouble("tempat_latitude");
                 Double longitude = tempat.getDouble("tempat_longitude");
                 String kategoriName = tempat.getString("kategori_name");
                 String kategoriIcon = tempat.getString("kategori_icon");
+                Log.d(TAG, "onResponse: masuk perulangan id : " +tempatId);
 
-                createMarker(latitude, longitude, Integer.toString(tempatId), tempatName, kategoriIcon);
+                Integer icons = R.drawable.map_marker_blue;
+
+                mMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(latitude, longitude))
+                    .anchor(0.5f, 0.5f)
+                    .title(tempatName)
+                    .snippet(kategoriIcon + " -> " + tempatId)
+                    .icon(BitmapDescriptorFactory.fromResource(icons))
+                );
+
+                mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                  @Override
+                  public void onInfoWindowClick(Marker marker) {
+                    Intent intent = new Intent(MapsActivity.this, DetailActivity.class);
+                    intent.putExtra("TEMPAT_ID", tempatId);
+                    startActivity(intent);
+                  }
+                });
+
+//                createMarker(latitude, longitude, Integer.toString(tempatId), tempatName, kategoriIcon);
 //                Tempat mTempat = new Tempat(tempatId, tempatName, latitude, longitude, kategoriName, kategoriIcon);
 //                listTempat.set(i,mTempat);
 //                Log.d(TAG, "List tempat: "+ mTempat.toString());
@@ -286,7 +276,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
               StringWriter stack = new StringWriter();
               e.printStackTrace(new PrintWriter(stack));
 //              e.printStackTrace();
-              Log.d(TAG, "onResponse: "+e);
+              Log.d(TAG, "onResponse: " + e);
               Log.d(TAG, "onResponse:" + stack.toString());
             }
           }
@@ -302,13 +292,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     mRequestQueue.add(request);
   }
 
-  protected Marker createMarker(double latitude, double longitude, final String id, String title, String snippet) {
+  public Marker createMarker(double latitude, double longitude, final String id, String title, String snippet) {
     mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
       @Override
       public void onInfoWindowClick(Marker marker) {
         Intent intent = new Intent(MapsActivity.this, DetailActivity.class);
-        intent.putExtra("TEMPAT_ID", id);
+        Bundle bundle = new Bundle();
+        bundle.putString("TEMPAT_ID", id);
         startActivity(intent);
+//        getIntent().removeExtra("TEMPAT_ID");
       }
     });
     /*merubah text jadi Integer*/
@@ -317,11 +309,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Integer icons = R.drawable.map_marker_blue;
 
     return mMap.addMarker(new MarkerOptions()
-            .position(new LatLng(latitude, longitude))
-            .anchor(0.5f, 0.5f)
-            .title(title)
-            .snippet(snippet + " -> "+ id)
-            .icon(BitmapDescriptorFactory.fromResource(icons))
+        .position(new LatLng(latitude, longitude))
+        .anchor(0.5f, 0.5f)
+        .title(title)
+        .snippet(snippet + " -> " + id)
+        .icon(BitmapDescriptorFactory.fromResource(icons))
     );
   }
 }

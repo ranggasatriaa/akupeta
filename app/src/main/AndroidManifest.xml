@@ -19,18 +19,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-
         <activity
-
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -38,12 +34,11 @@
         </activity>
         <activity
             android:name=".DetailActivity"
-            android:label="@string/title_activity_detail" />
-
+            android:label="@string/title_activity_detail"
+            android:parentActivityName="MapsActivity"/>
         <activity
             android:name=".TambahActivity"
             android:label="@string/title_activity_tambah"
-            android:parentActivityName="MapsActivity"></activity>
+            android:parentActivityName="MapsActivity"/>
     </application>
-
 </manifest>

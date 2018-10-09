@@ -12,6 +12,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.maps.GoogleMap;
@@ -44,7 +45,7 @@ public class DetailActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_detail);
-    Log.d(TAG, "onCreate: HERE");
+    Log.d(TAG, "onCreate: DetailActivity");
     mImage = findViewById(R.id.image);
     mKategori = findViewById(R.id.kategoriTextView);
     mAddress = findViewById(R.id.alamatTextView);
@@ -53,46 +54,55 @@ public class DetailActivity extends AppCompatActivity {
     mRequestQueue = Volley.newRequestQueue(this);
 
     tempat_id = getIntent().getStringExtra("TEMPAT_ID");
+//    tempat_id = 1;
     Log.d(TAG, "onCreate: " + tempat_id);
-    url = "http://nearyou.ranggasatria.com/index.php/api/detail/" + tempat_id;
+    url = "http://nearyou.ranggasatria.com/api/detail/" + tempat_id;
     Log.d(TAG, "onCreate: " + url);
     jsonParse(url);
 
   }
 
   private void jsonParse(String url) {
-    JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-        new Response.Listener<JSONObject>() {
+    StringRequest request = new StringRequest(Request.Method.GET, url,
+        new Response.Listener<String>() {
           @Override
-          public void onResponse(JSONObject response) {
+          public void onResponse(String response) {
             Log.d(TAG, "onResponse: Masuk JSON");
 //            Log.d(TAG, "onResponse: url di json" + url);
             try {
-              Log.d(TAG, "onResponse: " + response.toString());
+              Log.d(TAG, "onResponse: " + response);
 
-              JSONArray jsonArray = response.getJSONArray("detail");
+              JSONObject detail = new JSONObject(response);
               Log.d(TAG, "onResponse: masuk perulangan");
-              JSONObject tempat = jsonArray.getJSONObject(0);
-                String tempatId = tempat.getString("id");
-//                String tempatNama = tempat.getString("tempat_nama");
-//                Double latitude = tempat.getDouble("tempat_latitude");
-//                Double longitude = tempat.getDouble("tempat_longitude");
-              String kategoriNama = tempat.getString("kategori_name");
-              String deskripsi = tempat.getString("tempat_deskripsi");
-              String telepon = tempat.getString("tempat_telphone");
-              String alamat = tempat.getString("tempat_alamat");
-              String imageUrl = tempat.getString("kategori_icon");
+              String tempatId = detail.getString("id");
+              String tempatNama = detail.getString("tempat_nama");
+              Double latitude = detail.getDouble("tempat_latitude");
+              Double longitude = detail.getDouble("tempat_longitude");
+              String kategoriNama = detail.getString("kategori_name");
+              String deskripsi = detail.getString("tempat_deskripsi");
+              String telepon = detail.getString("tempat_telphone");
+              String alamat = detail.getString("tempat_alamat");
+              String imageUrl = detail.getString("kategori_icon");
+
+              /*SET GAMBAR*/
+              JSONArray listGambar = detail.getJSONArray("picture");
+              for (int i = 0; i < listGambar.length(); i++) {
+                Log.d(TAG, "onResponse: masuk perulangan picture");
+                JSONObject gambar = listGambar.getJSONObject(i);
+                String gambarDirektori = gambar.getString("gambar_direktori");
+                Log.d(TAG, "onResponse: gambar direktori: "+gambarDirektori);
+              }
 
               Log.d(TAG, "onResponse: " + imageUrl);
-
-              mKategori.setText(kategoriNama+"->"+tempatId);
+              Log.d(TAG, "onResponse: " + tempatId);
+              mKategori.setText(kategoriNama + "->" + tempatId);
               mDescription.setText(deskripsi);
               mAddress.setText(alamat);
               mTelepone.setText(telepon);
 //              Glide.with(context)
 //                  .load("http://nearyou.ranggasatria.com/assets/"+imageUrl)
 //                  .into(mImage);
-              Picasso.with(DetailActivity.this).load("http://nearyou.ranggasatria.com/assets/"+imageUrl).fit().centerInside().into(mImage);
+              Picasso.with(DetailActivity.this).load("http://nearyou.ranggasatria.com/assets/" + imageUrl).fit().centerInside().into(mImage);
 //              }
             } catch (JSONException e) {
               StringWriter stack = new StringWriter();
