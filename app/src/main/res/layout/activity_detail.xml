@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,11 +9,20 @@
     android:orientation="vertical"
     tools:context=".DetailActivity">
 
+    <android.support.v7.widget.Toolbar
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        app:titleTextColor="@color/colorWhite"
+        android:theme="@style/ToolbarTheme"/>
+
     <ImageView
         android:id="@+id/image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_launcher_background" />
+        app:srcCompat="@drawable/ic_launcher_background" />
 
     <TextView
         android:id="@+id/kategoriTextView"
@@ -45,7 +55,7 @@
                     android:layout_width="@dimen/margin_30"
                     android:layout_height="@dimen/length_30"
                     android:layout_margin="@dimen/margin_10"
-                    android:src="@drawable/ic_menu_orange" />
+                    app:srcCompat="@drawable/ic_menu_orange" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -76,7 +86,7 @@
                     android:layout_width="@dimen/margin_30"
                     android:layout_height="@dimen/length_30"
                     android:layout_margin="@dimen/margin_10"
-                    android:src="@drawable/ic_location_on_orange" />
+                    app:srcCompat="@drawable/ic_location_on_orange" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -107,7 +117,7 @@
                     android:layout_width="@dimen/margin_30"
                     android:layout_height="@dimen/length_30"
                     android:layout_margin="@dimen/margin_10"
-                    android:src="@drawable/ic_phone_in_orange" />
+                    app:srcCompat="@drawable/ic_phone_in_orange" />
 
                 <LinearLayout
                     android:layout_width="match_parent"

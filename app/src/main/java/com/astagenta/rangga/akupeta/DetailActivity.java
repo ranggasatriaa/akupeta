@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.support.v7.widget.Toolbar;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -30,6 +31,7 @@ public class DetailActivity extends AppCompatActivity {
   private static final String TAG = "DetailActivity";
   private Context context;
 
+  private Toolbar toolbar;
 
   private GoogleMap mMap;
   private RequestQueue mRequestQueue;
@@ -40,11 +42,13 @@ public class DetailActivity extends AppCompatActivity {
   private TextView mDescription;
   private TextView mAddress;
   private TextView mTelepone;
+  private String gambarDirektori;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_detail);
+
     Log.d(TAG, "onCreate: DetailActivity");
     mImage = findViewById(R.id.image);
     mKategori = findViewById(R.id.kategoriTextView);
@@ -55,11 +59,23 @@ public class DetailActivity extends AppCompatActivity {
 
     tempat_id = getIntent().getStringExtra("TEMPAT_ID");
 //    tempat_id = 1;
-    Log.d(TAG, "onCreate: " + tempat_id);
     url = "http://nearyou.ranggasatria.com/api/detail/" + tempat_id;
     Log.d(TAG, "onCreate: " + url);
     jsonParse(url);
 
+    Log.d(TAG, "onCreate: " + tempat_id);
+
+    /*TOOLBAR*/
+    toolbar = findViewById(R.id.toolbar);
+    setSupportActionBar(toolbar);
+    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    getSupportActionBar().setDisplayShowHomeEnabled(true);
+  }
+
+  @Override
+  public boolean onSupportNavigateUp() {
+    onBackPressed();
+    return true;
   }
 
   private void jsonParse(String url) {
@@ -67,6 +83,7 @@ public class DetailActivity extends AppCompatActivity {
         new Response.Listener<String>() {
           @Override
           public void onResponse(String response) {
+
             Log.d(TAG, "onResponse: Masuk JSON");
 //            Log.d(TAG, "onResponse: url di json" + url);
             try {
@@ -89,12 +106,14 @@ public class DetailActivity extends AppCompatActivity {
               for (int i = 0; i < listGambar.length(); i++) {
                 Log.d(TAG, "onResponse: masuk perulangan picture");
                 JSONObject gambar = listGambar.getJSONObject(i);
-                String gambarDirektori = gambar.getString("gambar_direktori");
-                Log.d(TAG, "onResponse: gambar direktori: "+gambarDirektori);
+                gambarDirektori = gambar.getString("gambar_direktori");
+                Log.d(TAG, "onResponse: gambar direktori: " + gambarDirektori);
               }
 
-              Log.d(TAG, "onResponse: " + imageUrl);
-              Log.d(TAG, "onResponse: " + tempatId);
+              Log.d(TAG, "onResponse: id=>"+tempatId+", image=>" + imageUrl+", nama=>"+tempatNama);
+
+              getSupportActionBar().setTitle(tempatNama);
+
               mKategori.setText(kategoriNama + "->" + tempatId);
               mDescription.setText(deskripsi);
               mAddress.setText(alamat);
@@ -102,7 +121,7 @@ public class DetailActivity extends AppCompatActivity {
 //              Glide.with(context)
 //                  .load("http://nearyou.ranggasatria.com/assets/"+imageUrl)
 //                  .into(mImage);
-              Picasso.with(DetailActivity.this).load("http://nearyou.ranggasatria.com/assets/" + imageUrl).fit().centerInside().into(mImage);
+              Picasso.with(DetailActivity.this).load("http://nearyou.ranggasatria.com/assets/image/" + gambarDirektori).fit().centerInside().into(mImage);
 //              }
             } catch (JSONException e) {
               StringWriter stack = new StringWriter();
